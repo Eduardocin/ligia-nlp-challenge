@@ -1,11 +1,24 @@
-ipython
-jupyterlab
-matplotlib
-notebook
-numpy
+# Core Data Science
 pandas
-pip
-python-dotenv
-ruff
+numpy
+matplotlib
+seaborn
+
+# NLP & Text Processing
+nltk
+wordcloud
+spacy
+spacy-transformers
+
+# Machine Learning
 scikit-learn
--e .
+xgboost
+
+# Deep Learning
+torch
+transformers
+datasets
+accelerate
+
+# Utilities
+tqdm
