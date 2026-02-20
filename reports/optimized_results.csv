@@ -1,0 +1,4 @@
+Modelo,Accuracy,F1 (weighted),Precision,Recall,F1 CV (mean),Melhores Parâmetros
+Extra Trees,0.9997761862130707,0.9997762220662992,0.9997763953848341,0.9997761862130707,0.9995526305885184,"{'n_estimators': 300, 'min_samples_split': 2, 'min_samples_leaf': 2, 'max_features': 0.3, 'max_depth': 100, 'class_weight': 'balanced'}"
+LinearSVC,0.999104744852283,0.9991044573805097,0.9991047201819065,0.999104744852283,0.9993281841996465,"{'tol': 1e-05, 'penalty': 'l2', 'max_iter': 2000, 'loss': 'squared_hinge', 'dual': True, 'C': 10.0}"
+SGDClassifier,0.9988809310653536,0.9988803916513969,0.9988810906620297,0.9988809310653536,0.999216039340481,"{'alpha': 5e-05, 'eta0': 0.1, 'l1_ratio': np.float64(0.6208616204015556), 'learning_rate': 'constant', 'loss': 'hinge', 'max_iter': 2000, 'penalty': 'l2', 'tol': 0.0001}"

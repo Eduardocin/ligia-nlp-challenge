@@ -1,24 +1,30 @@
-# Core Data Science
-pandas
-numpy
-matplotlib
-seaborn
+# ─── Core Data Science ────────────────────────────────────────────────────────
+pandas==2.3.3
+numpy==2.4.1
+scipy==1.17.0
 
-# NLP & Text Processing
-nltk
-wordcloud
-spacy
-spacy-transformers
+# ─── Visualização ─────────────────────────────────────────────────────────────
+matplotlib==3.10.8
+seaborn==0.13.2
+wordcloud==1.9.4
 
-# Machine Learning
-scikit-learn
-xgboost
+# ─── NLP & Processamento de Texto ─────────────────────────────────────────────
+nltk==3.9.1
 
-# Deep Learning
-torch
-transformers
-datasets
-accelerate
+# ─── Machine Learning (clássico) ──────────────────────────────────────────────
+scikit-learn==1.8.0
+xgboost==2.1.4
 
-# Utilities
-tqdm
+# ─── Explicabilidade ──────────────────────────────────────────────────────────
+lime==0.2.0.1
+
+# ─── Deep Learning / Transformers ─────────────────────────────────────────────
+torch==2.6.0
+transformers==4.49.0
+datasets==3.3.0
+accelerate==1.4.0
+
+# ─── Utilitários ──────────────────────────────────────────────────────────────
+tqdm==4.67.1
+joblib==1.5.3
+python-dotenv==1.0.1
