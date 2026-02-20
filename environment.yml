@@ -1,0 +1,46 @@
+name: ligia-nlp
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - jupyter
+  - jupyterlab
+  - notebook
+  
+  # Core Data Science
+  - pandas
+  - numpy
+  - scipy
+  
+  # Visualization
+  - matplotlib
+  - seaborn
+  
+  # Machine Learning
+  - scikit-learn
+  
+  # Utilities
+  - tqdm
+  - joblib
+  
+  # Pip packages
+  - pip:
+      # NLP & Text Processing
+      - nltk
+      - wordcloud
+      - spacy>=3.0
+      - spacy-transformers
+      
+      # Machine Learning
+      - xgboost
+      
+      # Deep Learning
+      - torch
+      - transformers
+      - datasets
+      - accelerate
+      
+      # Additional utilities
+      - python-dotenv
