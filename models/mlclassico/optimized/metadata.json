@@ -1,0 +1,59 @@
+{
+  "linearsvc": {
+    "model": "linearsvc",
+    "best_params": {
+      "tol": 1e-05,
+      "penalty": "l2",
+      "max_iter": 2000,
+      "loss": "squared_hinge",
+      "dual": true,
+      "C": 10.0
+    },
+    "f1_cv": 0.9993281841996465,
+    "f1_val": 0.9991044573805097,
+    "accuracy_val": 0.999104744852283,
+    "file": "linearsvc_optimized.joblib"
+  },
+  "sgdclassifier": {
+    "model": "sgdclassifier",
+    "best_params": {
+      "alpha": 5e-05,
+      "eta0": 0.1,
+      "l1_ratio": 0.6208616204015556,
+      "learning_rate": "constant",
+      "loss": "hinge",
+      "max_iter": 2000,
+      "penalty": "l2",
+      "tol": 0.0001
+    },
+    "f1_cv": 0.999216039340481,
+    "f1_val": 0.9988803916513969,
+    "accuracy_val": 0.9988809310653536,
+    "file": "sgdclassifier_optimized.joblib"
+  },
+  "extratrees": {
+    "model": "extratrees",
+    "best_params": {
+      "n_estimators": 300,
+      "min_samples_split": 2,
+      "min_samples_leaf": 2,
+      "max_features": 0.3,
+      "max_depth": 100,
+      "class_weight": "balanced"
+    },
+    "f1_cv": 0.9995526305885184,
+    "f1_val": 0.9997762220662992,
+    "accuracy_val": 0.9997761862130707,
+    "file": "extratrees_optimized.joblib"
+  },
+  "dataset": {
+    "train_size": 17871,
+    "val_size": 4468,
+    "n_features": 50000,
+    "method": "Character N-grams (4-6)",
+    "ngram_range": [
+      4,
+      6
+    ]
+  }
+}

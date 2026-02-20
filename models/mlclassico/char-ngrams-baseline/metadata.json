@@ -1,0 +1,37 @@
+{
+  "preprocessing_method": "Character N-grams (4-6)",
+  "vectorizer_path": "../data/processed/char_ngrams\\tfidf_vectorizer_char_ngrams.joblib",
+  "vocab_size": 50000,
+  "models": [
+    {
+      "rank": 1,
+      "name": "Extra Trees",
+      "f1_weighted": 0.9997762220662992,
+      "accuracy": 0.9997761862130707,
+      "file": "model_1_extra_trees.joblib"
+    },
+    {
+      "rank": 2,
+      "name": "Random Forest",
+      "f1_weighted": 0.9995525157315757,
+      "accuracy": 0.9995523724261415,
+      "file": "model_2_random_forest.joblib"
+    },
+    {
+      "rank": 3,
+      "name": "LinearSVC",
+      "f1_weighted": 0.9991044573805097,
+      "accuracy": 0.999104744852283,
+      "file": "model_3_linearsvc.joblib"
+    },
+    {
+      "rank": 4,
+      "name": "SGDClassifier",
+      "f1_weighted": 0.9988803916513969,
+      "accuracy": 0.9988809310653536,
+      "file": "model_4_sgdclassifier.joblib"
+    }
+  ],
+  "date_trained": "2026-02-18 11:45:14",
+  "seed": 42
+}
