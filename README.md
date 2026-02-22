@@ -28,40 +28,43 @@ Este projeto implementa pipelines completos de NLP para classificação binária
 │   │   └── test.csv
 │   ├── interim/              <- Dados intermediários
 │   └── processed/            <- Artefatos para modelagem
-│       ├── train_clean.csv       <- Texto pré-processado (treino)
-│       ├── test_clean.csv        <- Texto pré-processado (teste)
-│       ├── X_train_tfidf.npz     <- Matriz TF-IDF (treino)
-│       ├── X_val_tfidf.npz       <- Matriz TF-IDF (validação)
-│       ├── X_test_tfidf.npz      <- Matriz TF-IDF (teste)
-│       ├── tfidf_vectorizer.joblib
-│       ├── y_train.csv / y_val.csv
-│       ├── train_indices.csv / val_indices.csv
-│       └── submission_*.csv      <- Arquivos de submissão gerados
+│       ├── submission_*.csv      <- Arquivos de submissão gerados
+│       └── char_ngrams/          <- Artefatos TF-IDF (Character N-grams)
+│           ├── train_clean.csv
+│           ├── test_clean.csv
+│           ├── X_train_tfidf.npz
+│           ├── X_val_tfidf.npz
+│           ├── X_test_tfidf.npz
+│           ├── tfidf_vectorizer_char_ngrams.joblib
+│           ├── y_train.csv / y_val.csv
+│           └── train_indices.csv / val_indices.csv
 │
 ├── models/
 │   ├── mlclassico/           <- Modelos de ML clássico (scikit-learn / XGBoost)
 │   │   ├── char-ngrams-baseline/  <- Baselines com Character N-grams
-│   │   │   ├── model_0_xgboost.joblib
-│   │   │   ├── model_1_extra_trees.joblib
-│   │   │   ├── model_2_random_forest.joblib
-│   │   │   ├── model_3_linearsvc.joblib
-│   │   │   ├── model_4_sgdclassifier.joblib
-│   │   │   └── metadata.json
+│   │   │   ├── model_1_xgboost.joblib
+│   │   │   ├── model_2_extra_trees.joblib
+│   │   │   ├── model_3_random_forest.joblib
+│   │   │   ├── model_4_linearsvc.joblib
+│   │   │   └── model_5_sgdclassifier.joblib
 │   │   └── optimized/             <- Modelos com hiperparâmetros otimizados
 │   │       ├── extratrees_optimized.joblib
 │   │       ├── linearsvc_optimized.joblib
 │   │       ├── sgdclassifier_optimized.joblib
 │   │       └── metadata.json
-│   └── deeplearning/         <- Modelos de Deep Learning (TinyBERT)
-│       └── tinybert_checkpoints/  <- Checkpoints HuggingFace Trainer
+│   └── deeplearning/         <- Modelo TinyBERT fine-tuned (HuggingFace format)
+│       ├── config.json
+│       ├── model.safetensors
+│       ├── tokenizer.json
+│       └── tokenizer_config.json
 │
 ├── notebooks/               <- Jupyter notebooks (executar na ordem)
 │   ├── 1.0-data-exploration.ipynb         <- EDA completa
 │   ├── 2.0-preprocessing.ipynb            <- Pré-processamento e vetorização
 │   ├── 3.0-baseline-models.ipynb          <- Baselines com 5 classificadores
 │   ├── 3.1-hyperparameter-optimization.ipynb <- Otimização de hiperparâmetros
-│   ├── 4.0-predictions.ipynb              <- Geração de submissões
-│   └── 5.0-tinybert.ipynb                 <- Fine-tuning TinyBERT
+│   ├── 4.0-predictions.ipynb              <- Geração de submissões + LIME
+│   └── 5.0-tinybert.ipynb                 <- Fine-tuning TinyBERT + LIME
 │
 ├── reports/
 │   ├── baseline_results.csv
@@ -139,19 +142,21 @@ Execute os notebooks **na ordem abaixo** para reproduzir o pipeline completo.
 
 ### 4. Geração de Predições e Submissão
 [notebooks/4.0-predictions.ipynb](notebooks/4.0-predictions.ipynb)
-- Carrega modelo XGBoost + vetorizador TF-IDF
-- Gera arquivo de submissão para Kaggle
-- Análise de concordância entre modelos (XGBoost vs ExtraTrees)
-- Ensemble por votação (XGBoost + LinearSVC)
+- Carrega modelos XGBoost + LinearSVC (calibrado) + vetorizador TF-IDF
+- Gera arquivos de submissão para Kaggle: `submission_xgboost.csv`, `submission_linearsvc.csv`, `submission_ensemble_xgb_svc_svc_wins.csv`
+- Análise de concordância entre modelos
+- Ensemble por votação suave (XGBoost + LinearSVC)
+- **Seção 8:** Interpretabilidade com LIME — exemplos individuais, comparação Real vs Fake e top palavras globais agregadas
 
 ### 5. Fine-tuning TinyBERT
 [notebooks/5.0-tinybert.ipynb](notebooks/5.0-tinybert.ipynb)
 - Modelo: `huawei-noah/TinyBERT_General_4L_312D` (~14.5 M parâmetros)
 - Tokenização WordPiece com `title [SEP] text`
 - HuggingFace Trainer com cosine schedule, label smoothing e early stopping
-- Checkpoints salvos em `models/deeplearning/tinybert_checkpoints/`
+- Modelo salvo em `models/deeplearning/` (compatível com HuggingFace `from_pretrained`)
 - Geração de submissão em `data/processed/submission_tinybert.csv`
-- > **Nota:** Projetado para rodar com GPU. Em CPU o treinamento é muito lento.
+- **Seção 10:** Interpretabilidade com LIME — exemplos individuais, comparação Real vs Fake e top palavras globais agregadas
+- > **Nota:** GPU fortemente recomendada (T4/V100). Em CPU o treinamento é muito lento.
 
 ---
 
@@ -189,26 +194,79 @@ jupyter lab
 | 5 | `4.0-predictions.ipynb` | ~2 min |
 | 6 | `5.0-tinybert.ipynb` | ~10 min (GPU) |
 
-### Submeter no Kaggle
+### Gerar e Submeter no Kaggle
 
-Após executar o notebook `4.0-predictions.ipynb`, os arquivos de submissão estarão em `data/processed/`:
+#### Passo 1 — Gerar o arquivo de submissão
+
+**ML Clássico (Ensemble XGBoost + LinearSVC):**
+Execute o notebook `4.0-predictions.ipynb` até o final. O arquivo será salvo automaticamente em:
+```
+data/processed/submission_ensemble_xgb_svc_svc_wins.csv
+```
+
+**Deep Learning (TinyBERT):**
+Execute o notebook `5.0-tinybert.ipynb` até a seção 9. O arquivo será salvo em:
+```
+data/processed/submission_tinybert.csv
+```
+
+> ⚠️ O TinyBERT requer GPU. No Google Colab, ative em `Ambiente de execução → Alterar tipo de execução → T4 GPU`.
+
+#### Passo 2 — Instalar o Kaggle CLI (primeira vez)
 
 ```bash
-# Submeter via Kaggle CLI
-kaggle competitions submit -c <competition-name> \
-  -f data/processed/submission_xgboost.csv \
-  -m "XGBoost baseline - char ngrams"
+pip install kaggle
+
+# Configurar credenciais (baixar kaggle.json em kaggle.com → Account → API)
+mkdir -p ~/.kaggle
+cp kaggle.json ~/.kaggle/kaggle.json
+chmod 600 ~/.kaggle/kaggle.json
 ```
+
+No Windows (PowerShell):
+```powershell
+mkdir "$env:USERPROFILE\.kaggle" -Force
+Copy-Item kaggle.json "$env:USERPROFILE\.kaggle\kaggle.json"
+```
+
+#### Passo 3 — Submeter via CLI
+
+```bash
+# Ensemble XGBoost + LinearSVC
+kaggle competitions submit -c ligia-nlp-challenge \
+  -f data/processed/submission_ensemble_xgb_svc_svc_wins.csv \
+  -m "Ensemble XGBoost + LinearSVC (char n-grams)"
+
+# LinearSVC otimizado
+kaggle competitions submit -c ligia-nlp-challenge \
+  -f data/processed/submission_linearsvc.csv \
+  -m "LinearSVC otimizado (char n-grams)"
+
+# TinyBERT fine-tuned
+kaggle competitions submit -c ligia-nlp-challenge \
+  -f data/processed/submission_tinybert.csv \
+  -m "TinyBERT fine-tuned (4L-312D)"
+```
+
+> Substitua `ligia-nlp-challenge` pelo nome exato da competição no Kaggle (visível na URL da competição).
+
+#### Alternativa — Submeter pela interface web
+
+1. Acesse a página da competição no Kaggle
+2. Clique em **Submit Predictions**
+3. Faça upload do arquivo `submission_*.csv` desejado
+4. Adicione uma descrição e confirme
 
 ### Usar Modelo Pré-treinado
 
 ```python
-import joblib
-import scipy.sparse
+import joblib, scipy.sparse
 
-# Carregar vetorizador e modelo otimizado
-tfidf = joblib.load('data/processed/tfidf_vectorizer.joblib')
-model = joblib.load('models/mlclassico/char-ngrams-baseline/model_0_xgboost.joblib')
+# Carregar vetorizador (Character N-grams)
+tfidf = joblib.load('data/processed/char_ngrams/tfidf_vectorizer_char_ngrams.joblib')
+
+# Modelo baseline XGBoost
+model = joblib.load('models/mlclassico/char-ngrams-baseline/model_1_xgboost.joblib')
 
 # Fazer predições
 texts = ["Breaking: President signs new bill into law"]
@@ -216,21 +274,27 @@ X = tfidf.transform(texts)
 predictions = model.predict(X)
 print(f"Predição: {'Fake' if predictions[0] == 1 else 'Real'}")
 
-# Modelo otimizado (LinearSVC)
-model_opt = joblib.load('models/mlclassico/optimized/linearsvc_optimized.joblib')
+# Modelos otimizados disponíveis
+linearsvc = joblib.load('models/mlclassico/optimized/linearsvc_optimized.joblib')
+extratrees = joblib.load('models/mlclassico/optimized/extratrees_optimized.joblib')
 ```
 
-## ️ Principais Tecnologias
+**TinyBERT (HuggingFace):**
+```python
+import torch
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-| Categoria | Bibliotecas |
-|-----------|-------------|
-| Dados | `pandas`, `numpy`, `scipy` |
-| Visualização | `matplotlib`, `seaborn`, `wordcloud` |
-| NLP | `nltk` |
-| ML Clássico | `scikit-learn`, `xgboost` |
-| Deep Learning | `torch`, `transformers`, `datasets`, `accelerate` |
-| Serialização | `joblib` |
-| Ambiente | Jupyter Lab, conda |
+tokenizer = AutoTokenizer.from_pretrained('models/deeplearning')
+model = AutoModelForSequenceClassification.from_pretrained('models/deeplearning')
+model.eval()
+
+text = "Breaking: President signs new bill into law"
+inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=256)
+with torch.no_grad():
+    logits = model(**inputs).logits
+pred = torch.argmax(logits, dim=-1).item()
+print(f"Predição: {'Fake' if pred == 1 else 'Real'}")
+```
 
 ## 📂 Dados
 
